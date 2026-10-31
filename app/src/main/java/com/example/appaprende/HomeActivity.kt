@@ -19,11 +19,12 @@ class HomeActivity : AppCompatActivity() {
         setContentView(R.layout.activity_home)
 
         val txtBienvenida = findViewById<TextView>(R.id.txtBienvenida)
-        val btnCerrarSesion = findViewById<Button>(R.id.btnCerrarSesion)
 
         val btnLibros = findViewById<Button>(R.id.btnLibros)
         val btnVideos = findViewById<Button>(R.id.btnVideos)
         val btnArticulos = findViewById<Button>(R.id.btnArticulos)
+        val btnAgregarRecurso = findViewById<Button>(R.id.btnAgregarRecurso)
+        val btnCerrarSesion = findViewById<Button>(R.id.btnCerrarSesion)
 
         val nombre = intent.getStringExtra("nombreUsuario")
         txtBienvenida.text = "¡Bienvenido, ${nombre ?: "estudiante"}!"
@@ -38,6 +39,11 @@ class HomeActivity : AppCompatActivity() {
 
         btnArticulos.setOnClickListener {
             abrirRecursos("Artículos")
+        }
+
+        btnAgregarRecurso.setOnClickListener {
+            val intent = Intent(this, AgregarRecursoActivity::class.java)
+            startActivity(intent)
         }
 
         btnCerrarSesion.setOnClickListener {
