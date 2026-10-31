@@ -45,7 +45,12 @@ class LoginActivity : AppCompatActivity() {
                 }
 
                 else -> {
-                    Toast.makeText(this, "¡Bienvenido a AppAprende!", Toast.LENGTH_SHORT).show()
+                    val nombre = preferencias.getString(correo + "_nombre", "estudiante")
+
+                    val intent = Intent(this, HomeActivity::class.java)
+                    intent.putExtra("nombreUsuario", nombre)
+                    startActivity(intent)
+                    finish()
                 }
             }
         }
