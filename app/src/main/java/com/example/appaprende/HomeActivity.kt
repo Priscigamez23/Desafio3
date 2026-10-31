@@ -3,6 +3,7 @@ package com.example.appaprende
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +20,7 @@ class HomeActivity : AppCompatActivity() {
         setContentView(R.layout.activity_home)
 
         val txtBienvenida = findViewById<TextView>(R.id.txtBienvenida)
+        val edtBuscar = findViewById<EditText>(R.id.edtBuscar)
 
         val btnLibros = findViewById<Button>(R.id.btnLibros)
         val btnVideos = findViewById<Button>(R.id.btnVideos)
@@ -44,6 +46,21 @@ class HomeActivity : AppCompatActivity() {
         btnAgregarRecurso.setOnClickListener {
             val intent = Intent(this, AgregarRecursoActivity::class.java)
             startActivity(intent)
+        }
+
+        edtBuscar.setOnEditorActionListener { _, _, _ ->
+            val texto = edtBuscar.text.toString().trim()
+
+            if (texto.isEmpty()) {
+                edtBuscar.error = "Escribe el nombre del recurso"
+            } else {
+                val intent = Intent(this, RecursosActivity::class.java)
+                intent.putExtra("busqueda", texto)
+                intent.putExtra("categoria", "Todos")
+                startActivity(intent)
+            }
+
+            true
         }
 
         btnCerrarSesion.setOnClickListener {

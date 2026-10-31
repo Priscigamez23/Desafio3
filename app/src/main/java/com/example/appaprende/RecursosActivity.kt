@@ -1,7 +1,6 @@
 package com.example.appaprende
 
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -22,6 +21,7 @@ class RecursosActivity : AppCompatActivity() {
     private lateinit var contenedor: LinearLayout
     private lateinit var txtEstado: TextView
     private lateinit var categoria: String
+    private var busqueda: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,8 +33,13 @@ class RecursosActivity : AppCompatActivity() {
         val btnVolver = findViewById<Button>(R.id.btnVolver)
 
         categoria = intent.getStringExtra("categoria") ?: "Todos"
+        busqueda = intent.getStringExtra("busqueda") ?: ""
 
-        txtCategoria.text = "Categoría: $categoria"
+        txtCategoria.text = if (busqueda.isNotEmpty()) {
+            "Resultados de búsqueda: $busqueda"
+        } else {
+            "Categoría: $categoria"
+        }
 
         btnVolver.setOnClickListener {
             finish()
@@ -48,18 +53,22 @@ class RecursosActivity : AppCompatActivity() {
             try {
                 val recursos = recursoController.obtenerRecursos()
 
-                val recursosFiltrados = if (categoria == "Todos") {
-                    recursos
-                } else {
-                    recursos.filter {
-                        it.categoria.equals(categoria, ignoreCase = true)
-                    }
+                val recursosFiltrados = recursos.filter { recurso ->
+
+                    val coincideCategoria = categoria == "Todos" ||
+                            recurso.categoria.equals(categoria, ignoreCase = true)
+
+                    val coincideBusqueda = busqueda.isEmpty() ||
+                            recurso.titulo.contains(busqueda, ignoreCase = true) ||
+                            recurso.descripcion.contains(busqueda, ignoreCase = true)
+
+                    coincideCategoria && coincideBusqueda
                 }
 
                 contenedor.removeAllViews()
 
                 if (recursosFiltrados.isEmpty()) {
-                    txtEstado.text = "Todavía no hay recursos en esta categoría."
+                    txtEstado.text = "No se encontraron recursos."
                 } else {
                     txtEstado.text =
                         "Recursos encontrados: ${recursosFiltrados.size}"
