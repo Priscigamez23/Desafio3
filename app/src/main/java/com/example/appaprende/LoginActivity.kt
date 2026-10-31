@@ -7,8 +7,13 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.appaprende.controller.UsuarioController
+import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
+
+    private val usuarioController = UsuarioController()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,24 +38,66 @@ class LoginActivity : AppCompatActivity() {
 
             when {
                 correo.isEmpty() || contrasena.isEmpty() -> {
-                    Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Completa todos los campos",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
                 !preferencias.contains(correo) -> {
-                    Toast.makeText(this, "Esta cuenta no está registrada", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Esta cuenta no está registrada",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
                 preferencias.getString(correo, "") != contrasena -> {
-                    Toast.makeText(this, "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Correo o contraseña incorrectos",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
                 else -> {
-                    val nombre = preferencias.getString(correo + "_nombre", "estudiante")
 
-                    val intent = Intent(this, HomeActivity::class.java)
-                    intent.putExtra("nombreUsuario", nombre)
-                    startActivity(intent)
-                    finish()
+                    btnIniciarSesion.isEnabled = false
+
+                    lifecycleScope.launch {
+                        try {
+                            val usuario = usuarioController.buscarUsuario(correo)
+
+                            if (usuario == null) {
+                                Toast.makeText(
+                                    this@LoginActivity,
+                                    "La cuenta no existe en el servidor",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } else {
+                                val nombre = usuario.nombre
+
+                                val intent = Intent(
+                                    this@LoginActivity,
+                                    HomeActivity::class.java
+                                )
+
+                                intent.putExtra("nombreUsuario", nombre)
+                                startActivity(intent)
+                                finish()
+                            }
+
+                        } catch (e: Exception) {
+                            Toast.makeText(
+                                this@LoginActivity,
+                                "Error al conectar con el servidor: ${e.message}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } finally {
+                            btnIniciarSesion.isEnabled = true
+                        }
+                    }
                 }
             }
         }

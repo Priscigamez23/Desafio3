@@ -4,9 +4,15 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.appaprende.controller.RecursoController
+import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
+
+    private val recursoController = RecursoController()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,17 +21,60 @@ class HomeActivity : AppCompatActivity() {
         val txtBienvenida = findViewById<TextView>(R.id.txtBienvenida)
         val btnCerrarSesion = findViewById<Button>(R.id.btnCerrarSesion)
 
-        val preferencias = getSharedPreferences("AppAprende", MODE_PRIVATE)
+        val btnLibros = findViewById<Button>(R.id.btnLibros)
+        val btnVideos = findViewById<Button>(R.id.btnVideos)
+        val btnArticulos = findViewById<Button>(R.id.btnArticulos)
 
         val nombre = intent.getStringExtra("nombreUsuario")
-
         txtBienvenida.text = "¡Bienvenido, ${nombre ?: "estudiante"}!"
+
+        btnLibros.setOnClickListener {
+            abrirRecursos("Libros")
+        }
+
+        btnVideos.setOnClickListener {
+            abrirRecursos("Videos")
+        }
+
+        btnArticulos.setOnClickListener {
+            abrirRecursos("Artículos")
+        }
 
         btnCerrarSesion.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             finish()
+        }
+
+        probarConexionAPI()
+    }
+
+    private fun abrirRecursos(categoria: String) {
+        val intent = Intent(this, RecursosActivity::class.java)
+        intent.putExtra("categoria", categoria)
+        startActivity(intent)
+    }
+
+    private fun probarConexionAPI() {
+        lifecycleScope.launch {
+            try {
+                val recursos = recursoController.obtenerRecursos()
+
+                Toast.makeText(
+                    this@HomeActivity,
+                    "Conexión exitosa. Recursos encontrados: ${recursos.size}",
+                    Toast.LENGTH_LONG
+                ).show()
+
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@HomeActivity,
+                    "Error de conexión: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 }

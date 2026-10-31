@@ -7,8 +7,15 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.appaprende.controller.UsuarioController
+import com.example.appaprende.model.Usuario
+import kotlinx.coroutines.launch
+import java.util.UUID
 
 class RegisterActivity : AppCompatActivity() {
+
+    private val usuarioController = UsuarioController()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,39 +44,105 @@ class RegisterActivity : AppCompatActivity() {
             when {
                 nombre.isEmpty() || correo.isEmpty() ||
                         contrasena.isEmpty() || confirmar.isEmpty() -> {
-                    Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Completa todos los campos",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
                 !Patterns.EMAIL_ADDRESS.matcher(correo).matches() -> {
-                    Toast.makeText(this, "Ingresa un correo válido", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Ingresa un correo válido",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
                 contrasena.length < 8 -> {
-                    Toast.makeText(this, "La contraseña debe tener al menos 8 caracteres", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "La contraseña debe tener al menos 8 caracteres",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
                 contrasena != confirmar -> {
-                    Toast.makeText(this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Las contraseñas no coinciden",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
                 preferencias.contains(correo) -> {
-                    Toast.makeText(this, "Este correo ya está registrado", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Este correo ya está registrado",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
                 else -> {
-                    preferencias.edit()
-                        .putString(correo, contrasena)
-                        .putString(correo + "_nombre", nombre)
-                        .apply()
 
-                    edtNombre.text.clear()
-                    edtCorreo.text.clear()
-                    edtContrasena.text.clear()
-                    edtConfirmar.text.clear()
+                    btnRegistrar.isEnabled = false
 
-                    Toast.makeText(this, "¡Registro exitoso!", Toast.LENGTH_SHORT).show()
+                    lifecycleScope.launch {
 
-                    finish()
+                        try {
+                            val usuarioExistente =
+                                usuarioController.buscarUsuario(correo)
+
+                            if (usuarioExistente != null) {
+
+                                Toast.makeText(
+                                    this@RegisterActivity,
+                                    "Este correo ya está registrado",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                            } else {
+
+                                val usuario = Usuario(
+                                    id = UUID.randomUUID().toString(),
+                                    nombre = nombre,
+                                    correo = correo,
+                                    rol = "estudiante"
+                                )
+
+                                usuarioController.agregarUsuario(usuario)
+
+                                preferencias.edit()
+                                    .putString(correo, contrasena)
+                                    .putString(correo + "_nombre", nombre)
+                                    .apply()
+
+                                edtNombre.text.clear()
+                                edtCorreo.text.clear()
+                                edtContrasena.text.clear()
+                                edtConfirmar.text.clear()
+
+                                Toast.makeText(
+                                    this@RegisterActivity,
+                                    "¡Registro exitoso!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                                finish()
+                            }
+
+                        } catch (e: Exception) {
+
+                            Toast.makeText(
+                                this@RegisterActivity,
+                                "No se pudo completar el registro: ${e.message}",
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                        } finally {
+                            btnRegistrar.isEnabled = true
+                        }
+                    }
                 }
             }
         }
