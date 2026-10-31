@@ -26,6 +26,7 @@ class HomeActivity : AppCompatActivity() {
         val btnVideos = findViewById<Button>(R.id.btnVideos)
         val btnArticulos = findViewById<Button>(R.id.btnArticulos)
         val btnAgregarRecurso = findViewById<Button>(R.id.btnAgregarRecurso)
+        val btnVerFavoritos = findViewById<Button>(R.id.btnVerFavoritos)
         val btnCerrarSesion = findViewById<Button>(R.id.btnCerrarSesion)
 
         val nombre = intent.getStringExtra("nombreUsuario")
@@ -61,6 +62,11 @@ class HomeActivity : AppCompatActivity() {
             }
 
             true
+        }
+
+        btnVerFavoritos.setOnClickListener {
+            val intent = Intent(this, FavoritosActivity::class.java)
+            startActivity(intent)
         }
 
         btnCerrarSesion.setOnClickListener {

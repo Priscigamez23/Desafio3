@@ -1,7 +1,7 @@
 package com.example.appaprende.model
 
 data class Recurso(
-    val id: String,
+    val id: String? = null,
     val titulo: String,
     val descripcion: String,
     val categoria: String,

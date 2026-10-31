@@ -5,7 +5,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
 
-    private const val BASE_URL = "https://68cd614fda4697a7f305c2e7.mockapi.io/api/appaprende/"
+    private const val BASE_URL =
+        "https://68cd614fda4697a7f305c2e7.mockapi.io/api/appaprende/"
 
     val apiService: ApiService by lazy {
         Retrofit.Builder()

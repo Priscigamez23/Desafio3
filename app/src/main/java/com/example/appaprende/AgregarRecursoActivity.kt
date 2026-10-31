@@ -11,7 +11,6 @@ import androidx.lifecycle.lifecycleScope
 import com.example.appaprende.controller.RecursoController
 import com.example.appaprende.model.Recurso
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 class AgregarRecursoActivity : AppCompatActivity() {
 
@@ -57,8 +56,11 @@ class AgregarRecursoActivity : AppCompatActivity() {
             val autor = edtAutor.text.toString().trim()
 
             when {
-                titulo.isEmpty() || descripcion.isEmpty() ||
-                        enlace.isEmpty() || autor.isEmpty() -> {
+                titulo.isEmpty() ||
+                        descripcion.isEmpty() ||
+                        enlace.isEmpty() ||
+                        autor.isEmpty() -> {
+
                     Toast.makeText(
                         this,
                         "Completa todos los campos",
@@ -67,6 +69,7 @@ class AgregarRecursoActivity : AppCompatActivity() {
                 }
 
                 !android.util.Patterns.WEB_URL.matcher(enlace).matches() -> {
+
                     Toast.makeText(
                         this,
                         "Ingresa un enlace válido",
@@ -81,7 +84,7 @@ class AgregarRecursoActivity : AppCompatActivity() {
                     lifecycleScope.launch {
                         try {
                             val recurso = Recurso(
-                                id = UUID.randomUUID().toString(),
+                                id = null,
                                 titulo = titulo,
                                 descripcion = descripcion,
                                 categoria = categoria,
@@ -89,14 +92,16 @@ class AgregarRecursoActivity : AppCompatActivity() {
                                 autor = autor
                             )
 
-                            recursoController.agregarRecurso(recurso)
+                            val respuesta =
+                                recursoController.agregarRecurso(recurso)
 
                             Toast.makeText(
                                 this@AgregarRecursoActivity,
-                                "¡Recurso guardado correctamente!",
-                                Toast.LENGTH_SHORT
+                                "Recurso guardado. ID recibido: ${respuesta.id}",
+                                Toast.LENGTH_LONG
                             ).show()
 
+                            setResult(RESULT_OK)
                             finish()
 
                         } catch (e: Exception) {

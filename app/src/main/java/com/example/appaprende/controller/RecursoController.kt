@@ -22,10 +22,12 @@ class RecursoController {
     }
 
     suspend fun actualizarRecurso(recursoActualizado: Recurso): Recurso {
-        return apiService.actualizarRecurso(
-            recursoActualizado.id,
-            recursoActualizado
-        )
+        val id = recursoActualizado.id
+            ?: throw IllegalArgumentException(
+                "El recurso no tiene identificador."
+            )
+
+        return apiService.actualizarRecurso(id, recursoActualizado)
     }
 
     suspend fun eliminarRecurso(id: String) {

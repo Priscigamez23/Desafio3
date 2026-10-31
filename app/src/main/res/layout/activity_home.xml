@@ -102,6 +102,13 @@
             android:textSize="14sp" />
 
         <Button
+            android:id="@+id/btnVerFavoritos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Ver mis favoritos" />
+
+        <Button
             android:id="@+id/btnCerrarSesion"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
