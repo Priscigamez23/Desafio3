@@ -2,6 +2,7 @@ package com.example.appaprende
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -14,6 +15,8 @@ import kotlinx.coroutines.launch
 class HomeActivity : AppCompatActivity() {
 
     private val recursoController = RecursoController()
+
+    private var rolUsuario: String = "estudiante"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +33,16 @@ class HomeActivity : AppCompatActivity() {
         val btnCerrarSesion = findViewById<Button>(R.id.btnCerrarSesion)
 
         val nombre = intent.getStringExtra("nombreUsuario")
+        rolUsuario = intent.getStringExtra("rolUsuario") ?: "estudiante"
+
         txtBienvenida.text = "¡Bienvenido, ${nombre ?: "estudiante"}!"
+
+        // Solo los docentes pueden agregar recursos.
+        if (rolUsuario.equals("docente", ignoreCase = true)) {
+            btnAgregarRecurso.visibility = View.VISIBLE
+        } else {
+            btnAgregarRecurso.visibility = View.GONE
+        }
 
         btnLibros.setOnClickListener {
             abrirRecursos("Libros")
@@ -45,8 +57,10 @@ class HomeActivity : AppCompatActivity() {
         }
 
         btnAgregarRecurso.setOnClickListener {
-            val intent = Intent(this, AgregarRecursoActivity::class.java)
-            startActivity(intent)
+            if (rolUsuario.equals("docente", ignoreCase = true)) {
+                val intent = Intent(this, AgregarRecursoActivity::class.java)
+                startActivity(intent)
+            }
         }
 
         edtBuscar.setOnEditorActionListener { _, _, _ ->
@@ -58,6 +72,7 @@ class HomeActivity : AppCompatActivity() {
                 val intent = Intent(this, RecursosActivity::class.java)
                 intent.putExtra("busqueda", texto)
                 intent.putExtra("categoria", "Todos")
+                intent.putExtra("rolUsuario", rolUsuario)
                 startActivity(intent)
             }
 
@@ -83,6 +98,7 @@ class HomeActivity : AppCompatActivity() {
     private fun abrirRecursos(categoria: String) {
         val intent = Intent(this, RecursosActivity::class.java)
         intent.putExtra("categoria", categoria)
+        intent.putExtra("rolUsuario", rolUsuario)
         startActivity(intent)
     }
 

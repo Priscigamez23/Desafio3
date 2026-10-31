@@ -76,14 +76,14 @@ class LoginActivity : AppCompatActivity() {
                                     Toast.LENGTH_LONG
                                 ).show()
                             } else {
-                                val nombre = usuario.nombre
-
                                 val intent = Intent(
                                     this@LoginActivity,
                                     HomeActivity::class.java
                                 )
 
-                                intent.putExtra("nombreUsuario", nombre)
+                                intent.putExtra("nombreUsuario", usuario.nombre)
+                                intent.putExtra("rolUsuario", usuario.rol)
+
                                 startActivity(intent)
                                 finish()
                             }

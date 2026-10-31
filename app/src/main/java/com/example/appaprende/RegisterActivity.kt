@@ -25,6 +25,7 @@ class RegisterActivity : AppCompatActivity() {
         val edtCorreo = findViewById<EditText>(R.id.edtCorreoRegistro)
         val edtContrasena = findViewById<EditText>(R.id.edtContrasenaRegistro)
         val edtConfirmar = findViewById<EditText>(R.id.edtConfirmarContrasena)
+
         val btnRegistrar = findViewById<Button>(R.id.btnRegistrar)
         val txtVolverLogin = findViewById<TextView>(R.id.txtVolverLogin)
 
@@ -41,9 +42,17 @@ class RegisterActivity : AppCompatActivity() {
             val contrasena = edtContrasena.text.toString()
             val confirmar = edtConfirmar.text.toString()
 
+            val tieneMayuscula = contrasena.any { it.isUpperCase() }
+            val tieneMinuscula = contrasena.any { it.isLowerCase() }
+            val tieneNumero = contrasena.any { it.isDigit() }
+            val tieneEspecial = contrasena.any {
+                it in "!@#$%^&*"
+            }
+
             when {
                 nombre.isEmpty() || correo.isEmpty() ||
                         contrasena.isEmpty() || confirmar.isEmpty() -> {
+
                     Toast.makeText(
                         this,
                         "Completa todos los campos",
@@ -52,6 +61,7 @@ class RegisterActivity : AppCompatActivity() {
                 }
 
                 !Patterns.EMAIL_ADDRESS.matcher(correo).matches() -> {
+
                     Toast.makeText(
                         this,
                         "Ingresa un correo válido",
@@ -59,15 +69,53 @@ class RegisterActivity : AppCompatActivity() {
                     ).show()
                 }
 
-                contrasena.length < 8 -> {
+                contrasena.length < 12 -> {
+
                     Toast.makeText(
                         this,
-                        "La contraseña debe tener al menos 8 caracteres",
-                        Toast.LENGTH_SHORT
+                        "La contraseña debe tener al menos 12 caracteres",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                !tieneMayuscula -> {
+
+                    Toast.makeText(
+                        this,
+                        "La contraseña debe incluir una mayúscula",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                !tieneMinuscula -> {
+
+                    Toast.makeText(
+                        this,
+                        "La contraseña debe incluir una minúscula",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                !tieneNumero -> {
+
+                    Toast.makeText(
+                        this,
+                        "La contraseña debe incluir un número",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                !tieneEspecial -> {
+
+                    Toast.makeText(
+                        this,
+                        "La contraseña debe incluir un carácter especial (!@#$%^&*)",
+                        Toast.LENGTH_LONG
                     ).show()
                 }
 
                 contrasena != confirmar -> {
+
                     Toast.makeText(
                         this,
                         "Las contraseñas no coinciden",
@@ -76,6 +124,7 @@ class RegisterActivity : AppCompatActivity() {
                 }
 
                 preferencias.contains(correo) -> {
+
                     Toast.makeText(
                         this,
                         "Este correo ya está registrado",
@@ -88,7 +137,6 @@ class RegisterActivity : AppCompatActivity() {
                     btnRegistrar.isEnabled = false
 
                     lifecycleScope.launch {
-
                         try {
                             val usuarioExistente =
                                 usuarioController.buscarUsuario(correo)
@@ -103,11 +151,24 @@ class RegisterActivity : AppCompatActivity() {
 
                             } else {
 
+                                val nombreCorreo = correo
+                                    .substringBefore("@")
+                                    .lowercase()
+
+                                val rolAsignado = if (
+                                    nombreCorreo.contains("docente") ||
+                                    nombreCorreo.contains("profesor")
+                                ) {
+                                    "docente"
+                                } else {
+                                    "estudiante"
+                                }
+
                                 val usuario = Usuario(
                                     id = UUID.randomUUID().toString(),
                                     nombre = nombre,
                                     correo = correo,
-                                    rol = "estudiante"
+                                    rol = rolAsignado
                                 )
 
                                 usuarioController.agregarUsuario(usuario)
@@ -124,8 +185,8 @@ class RegisterActivity : AppCompatActivity() {
 
                                 Toast.makeText(
                                     this@RegisterActivity,
-                                    "¡Registro exitoso!",
-                                    Toast.LENGTH_SHORT
+                                    "¡Registro exitoso! Rol asignado: $rolAsignado",
+                                    Toast.LENGTH_LONG
                                 ).show()
 
                                 finish()

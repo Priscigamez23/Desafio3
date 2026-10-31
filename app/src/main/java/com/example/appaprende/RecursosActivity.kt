@@ -1,6 +1,7 @@
 package com.example.appaprende
 
 import android.os.Bundle
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -24,6 +25,7 @@ class RecursosActivity : AppCompatActivity() {
     private lateinit var categoria: String
 
     private var busqueda: String = ""
+    private var rolUsuario: String = "estudiante"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +39,7 @@ class RecursosActivity : AppCompatActivity() {
 
         categoria = intent.getStringExtra("categoria") ?: "Todos"
         busqueda = intent.getStringExtra("busqueda") ?: ""
+        rolUsuario = intent.getStringExtra("rolUsuario") ?: "estudiante"
 
         txtCategoria.text = if (busqueda.isNotEmpty()) {
             "Resultados de búsqueda: $busqueda"
@@ -140,20 +143,30 @@ class RecursosActivity : AppCompatActivity() {
         val btnFavorito = Button(this)
         val idRecurso = recurso.id
 
+        // Los estudiantes no pueden editar ni eliminar.
+        if (!rolUsuario.equals("docente", ignoreCase = true)) {
+            btnEditar.visibility = View.GONE
+            btnEliminar.visibility = View.GONE
+        }
+
         if (idRecurso.isNullOrBlank()) {
             btnFavorito.text = "Sin ID"
             btnFavorito.isEnabled = false
             btnEditar.isEnabled = false
             btnEliminar.isEnabled = false
         } else {
+
             actualizarBotonFavorito(btnFavorito, idRecurso)
 
-            btnEditar.setOnClickListener {
-                mostrarDialogoEditar(recurso)
-            }
+            if (rolUsuario.equals("docente", ignoreCase = true)) {
 
-            btnEliminar.setOnClickListener {
-                confirmarEliminar(recurso)
+                btnEditar.setOnClickListener {
+                    mostrarDialogoEditar(recurso)
+                }
+
+                btnEliminar.setOnClickListener {
+                    confirmarEliminar(recurso)
+                }
             }
 
             btnFavorito.setOnClickListener {
@@ -169,23 +182,25 @@ class RecursosActivity : AppCompatActivity() {
             }
         }
 
-        filaBotones.addView(
-            btnEditar,
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f
+        if (rolUsuario.equals("docente", ignoreCase = true)) {
+            filaBotones.addView(
+                btnEditar,
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f
+                )
             )
-        )
 
-        filaBotones.addView(
-            btnEliminar,
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f
+            filaBotones.addView(
+                btnEliminar,
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f
+                )
             )
-        )
+        }
 
         filaBotones.addView(
             btnFavorito,
@@ -232,6 +247,11 @@ class RecursosActivity : AppCompatActivity() {
     }
 
     private fun mostrarDialogoEditar(recurso: Recurso) {
+
+        if (!rolUsuario.equals("docente", ignoreCase = true)) {
+            mostrarMensaje("No tienes permiso para editar recursos")
+            return
+        }
 
         val idRecurso = recurso.id
 
@@ -354,6 +374,11 @@ class RecursosActivity : AppCompatActivity() {
 
     private fun confirmarEliminar(recurso: Recurso) {
 
+        if (!rolUsuario.equals("docente", ignoreCase = true)) {
+            mostrarMensaje("No tienes permiso para eliminar recursos")
+            return
+        }
+
         val idRecurso = recurso.id
 
         if (idRecurso.isNullOrBlank()) {
@@ -368,7 +393,6 @@ class RecursosActivity : AppCompatActivity() {
             )
             .setNegativeButton("Cancelar", null)
             .setPositiveButton("Eliminar") { _, _ ->
-
                 lifecycleScope.launch {
                     try {
                         recursoController.eliminarRecurso(idRecurso)
